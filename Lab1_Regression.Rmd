@@ -1,0 +1,420 @@
+---
+title: "BIOS7345 Lab 1: Non-central distributions"
+date: "6 September 2019"
+output: pdf_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE, tidy = TRUE, warning = FALSE, message = FALSE)
+
+#set the seed so your simulations are reproducible
+set.seed(333)
+
+#if you don't already have these
+#install.packages(c("ggplot2", "ggpubr", "xtable", "latex2exp"))
+
+#load packages
+library(ggplot2)
+library(ggpubr)
+library(xtable)
+library(latex2exp)
+
+#just trust me, you want this
+options(xtable.comment = FALSE)
+```
+
+#Chi-Square distribution
+
+##a) 
+Simulate 10,000 independent random observations from a Central Chi-Square distribution with 5 degrees of freedom
+
+```{r}
+num_obs <- 10000 #number of observations
+deg_free <- 5 #degrees of freedom
+```
+
+by first sampling from the standard normal distribution (i.e. $z_i$)
+
+```{r}
+#first sample from the N(0,1)
+z <- 
+```
+
+and working with the sum of the square of the $z_i$'s. 
+
+```{r}
+#work with the sum of squared N(0,1)s
+u <- 
+```
+
+Now, right a function `my_chi_sq()` that does the following: 
+
+  1.  takes in a parameter (`degrees_freedom`) for the desired degrees of freedom (duh),
+  2.  has parameters for the mean and variance of the Normal (which defaults to the standard Normal), and
+  3.  returns a single chi-squared random variable constructed as above.
+
+```{r}
+#now write a function
+my_chi_sq <- function(degrees_freedom, mu = 0, sigma = 1)
+{
+  
+  return()
+}
+
+#test your function
+my_chi_sq(deg_free)
+```
+
+Use the `replicate()` function to create a vector of 10,000 random variable constructed using your `my_chi_sq()` function.
+
+```{r}
+#use replicate() to create a vector of num_obs chi-squared random variables
+central_obs <- replicate(n = ,
+                    expr = )
+```
+
+Plot the density of the observed chi-square observations with a range of 0 to 60 on the x-axis. 
+
+```{r}
+#plot the density of the observed chi-squared obs
+central_plot <- ggplot(data = data.frame(central_obs), aes(x = central_obs))
+```
+
+Verify that this density plot agrees with the true density for $\chi^2_5$ using the built in `dchisq()` function.
+
+```{r}
+#compare your density to the true density of a chi-squared(5)
+central_plot <- central_plot + 
+```
+
+##b)
+Simulate 10,000 independent random observations from a non-central chi-square distribution with 5 degrees of freedom and non-centrality parameter $\lambda = 2$
+
+```{r}
+num_obs <- 10000 #number of observations
+deg_free <- 5 #degrees of freedom
+lambda <- 2 #non-centrality parameter
+```
+
+by first sampling from the normal distribution (i.e. $y_i$), and working with the sum of the square of the $y_i$'s. 
+
+Recall from Rencher (5.22) that $$\lambda = \frac{1}{2}\sum_{i=1}^{n}\mu_i^2,$$ where $n = $ the number of Normals you're summing up (which is also what?).
+
+```{r}
+#solve for mu using (5.22)
+nc_mu <- 
+
+#sample from the Normal distribution
+y <- 
+
+#work with the sum of squared Normals
+u <- 
+```
+
+Now, we can use our handy dandy `my_chi_sq()` function from above to create a vector of 10,000 non-central chi squared observations.
+
+```{r}
+#use my_chi_sq() and repliate() to create a vector of non-central chi-squared
+noncentral_obs <- replicate(n = ,
+                    expr = )
+```
+
+Plot the density of the observed non-central chi-square observations with a range of 0 to 60 on the x-axis.
+
+```{r}
+#plot the observations
+noncentral_plot <- ggplot(data = data.frame(noncentral_obs), aes(x = noncentral_obs)) 
+```
+
+Verify that this density plot agrees with the true density for $\chi^2_{5,2}$ using the built in `dchisq()` function. Hint: $\lambda$ in `R` is 2 times $\lambda$ in class (don't ask me why).
+
+```{r}
+#compare your density to the true density of a chi-squared(5,2)
+noncentral_plot <- noncentral_plot + 
+```
+
+##c)
+Compare plots from **1a)** to **1b)**.
+
+```{r}
+#Plot the central and non-central chi-squared side-by-side
+ggarrange(central_plot, noncentral_plot)
+```
+
+How do the mean and variance compare between the central and non-central chi-square distributions?
+
+Let's create a dataframe to keep track of these for the three distributions.
+
+```{r}
+#make a table so we can view these side-by-side
+tab <- data.frame(Dist = "Chi-Squared",
+                  Central = paste0(round(mean(central_obs), 3), " (", round(var(central_obs),3), ")"),
+                  NonCentral = paste0(round(mean(noncentral_obs), 3), " (", round(var(noncentral_obs),3), ")"))
+```
+
+#F distribution
+##a)
+Simulate 10,000 independent random observatios from a central F distribution with 2 and 20 degrees of freedom for the numerator and denominator, respectively.
+
+```{r}
+n <- 10000 #number of observations
+df_num <- 2 #degrees of freedom (numerator)
+df_denom <- 20 #degrees of freedom (denominator)
+```
+
+Do this by first sampling from two independent chi-square distributions
+
+```{r}
+#sample from two independent chi-square distributions
+```
+
+and work with the ratio of the observations.
+
+```{r}
+#take the ratio
+```
+
+Now, right a function `my_f()` that does the following: 
+
+  1.  takes in degrees of freedom parameters for the numerator and denominator (`degrees_freedom_num`, `degrees_freedom_denom`),
+  2.  has a parameter for a noncentrality parameter (`ncp`) (which defaults to 0), and
+  3.  returns a single F random variable constructed as above.
+
+```{r}
+#now write a function
+
+#test your function
+
+```
+
+Use the `replicate()` function to create a vector of 10,000 random variable constructed using your `my_f()` function.
+
+```{r}
+#use replicate to create a vector of F observartions
+
+```
+
+Plot the density of the observed F distribution with a range of 0 to 20 on the x-axis.
+
+```{r}
+#plot your observations
+```
+
+Verify that this density plot agrees with the true density for $F_{2,20}$ using the built in `df()` function.
+
+```{r}
+#compare your density to the true density of a F(2,20)
+
+```
+
+##b)
+Simulate 10,000 independent random observations from a non-central F distribution with 2 and 20 degrees of freedom for the numerator and denominator, respectively, and a non-centrality parameter $\lambda = 2$.
+
+```{r}
+n <- 10000 #number of observations
+df_num <- 2 #degrees of freedom (numerator)
+df_denom <- 20 #degrees of freedom (denominator)
+lambda <- 2 #non-centrality parameter
+```
+
+Do this by first sampling from two independent (possibly non-central) chi-square distributions (recalling that `R` parameterizes $\lambda$ differently)
+
+```{r}
+#sample from chi-square
+
+```
+
+and work with the ratio of the observations.
+
+```{r}
+#take the ratio
+
+```
+
+Now, we can use our handy dandy `my_f()` function from above to create a vector of 10,000 non-central F observations.
+
+```{r}
+#use my_f() and replicate() to create a vector of 10,000
+```
+
+Plot the density of the observed non-central chi-square observations with a range of 0 to 60 on the x-axis.
+
+```{r}
+#plot the observations
+
+```
+
+Verify that this density plot agrees with the true density for $F_{2,20}(2)$ using the built in `df()` function. Recall: $\lambda$ in `R` is 2 times $\lambda$ in class (don't ask me why).
+
+```{r}
+#compare your density to the true density of a F(2,20,2)
+
+```
+
+##c)
+Compare the plots from **2a)** and **2b)**.
+
+```{r}
+#plot central and non-central side-by-side
+
+```
+
+How do the mean and variance compare between the central and non-central F distributions? Let's append a row to our dataframe for the F distribution.
+
+```{r}
+#append a row to your table for the F distribution
+
+```
+
+#T distribution
+##a)
+Simulate 10,000 independent random observations from a central T distribution with 2 degrees of freedom
+
+```{r}
+num_obs <- 10000 #number of observations
+deg_free <- 2 #degrees of freedom
+```
+
+by first sampling from the standard normal distribution (i.e. $z_i$)
+
+```{r}
+#sample from the N(0,1)
+
+```
+
+and from an independent chi-square distribution,
+
+```{r}
+#sample from a chi-square
+
+```
+
+and working with the ratio of the two observations.
+
+```{r}
+#work with the ratio
+
+```
+
+Now, right a function `my_t()` that does the following: 
+
+  1.  takes in a degrees of freedom parameter (`degrees_freedom`),
+  2.  has a parameter for a noncentrality parameter (`ncp`) (which both default to 0), and
+  3.  returns a single t random variable constructed as above.
+
+```{r}
+#now write a function
+
+#test your function
+
+```
+
+Use the `replicate()` function to create a vector of 10,000 random variable constructed using your `my_t()` function.
+
+```{r}
+#use replicate to create 10,000 observations
+
+```
+
+Plot the density of the constructed T observations with a range of -40 to 40 on the x-axis.
+
+```{r}
+#plot your 10,000 observations
+
+```
+
+Verify that this density plot agrees with the true density for $t_{2}$ using the built in `dt()` function.
+
+```{r}
+#compare your density to the true density of a t(2)
+
+```
+
+##b)
+Simulate 10,000 independent random observations from a non-central T distribution with 2 degrees of freedom and non-centrality parameter $\mu = -3$
+
+```{r}
+n <- 10000 #number of observations
+deg_free <- 2 #degrees of freedom
+mu <- -3 #non-centrality parameter
+```
+
+by first sampling from the normal distribution (i.e. $y_i$)
+
+```{r}
+#sample from a Normal
+
+```
+
+and from an independent chi-square distribution,
+
+```{r}
+#sample from a chi-square
+
+```
+
+and working with the ratio of the two observations.
+
+```{r}
+#work with the ratio
+
+```
+
+Now, we can use our handy dandy `my_t()` function from above to create a vector of 10,000 non-central t observations.
+
+```{r}
+#use my_t() and replicate() to create a vector of 10,000
+```
+
+Plot the density of the observed T observations with a range from -40 to 40 on the x-axis.
+
+```{r}
+#plot the observations
+
+```
+
+Verify that this density plot agrees with the true density for $F_{2,20}(2)$ using the built in `df()` function. Recall: $\lambda$ in `R` is 2 times $\lambda$ in class (don't ask me why).
+
+```{r}
+#compare your density to the true density of a t(2,20)
+
+```
+
+Verify that this density plot agrees with a similar plot using the built-in `rt()` function with a non-centrality parameter.
+
+##c)
+Compare the plots from **3a)** and **3b)**.
+
+```{r}
+#plot central and non-central side-by-side
+
+```
+
+How do the mean and variance compare between the central and non-central t distributions? Let's append a row to our dataframe for the t distribution.
+
+```{r}
+#add a row to your table for the t distribution
+
+```
+
+#Discussion
+
+Use the `xtable()` function to print a PDF-friendly version of your table comparing the mean/variance between the central and non-central versions of these distributions.
+
+```{r, results = 'asis'}
+#use xtable() to print your table
+#try to add a descriptive caption
+
+```
+
+##Chi-squared distribution
+
+  - 
+
+##F distribution
+
+  - 
+
+##t distribution
+
+  - 
