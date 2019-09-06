@@ -37,14 +37,14 @@ by first sampling from the standard normal distribution (i.e. $z_i$)
 
 ```{r}
 #first sample from the N(0,1)
-z <- 
+z <- rnorm(n = deg_free, mean = 0, sd = 1)
 ```
 
 and working with the sum of the square of the $z_i$'s. 
 
 ```{r}
 #work with the sum of squared N(0,1)s
-u <- 
+u <- sum(z^2)
 ```
 
 Now, right a function `my_chi_sq()` that does the following: 
@@ -57,8 +57,9 @@ Now, right a function `my_chi_sq()` that does the following:
 #now write a function
 my_chi_sq <- function(degrees_freedom, mu = 0, sigma = 1)
 {
-  
-  return()
+  z <- rnorm(n = degrees_freedom, mean = mu, sd = sigma)
+  u <- sum(z^2)
+  return(u)
 }
 
 #test your function
@@ -69,22 +70,22 @@ Use the `replicate()` function to create a vector of 10,000 random variable cons
 
 ```{r}
 #use replicate() to create a vector of num_obs chi-squared random variables
-central_obs <- replicate(n = ,
-                    expr = )
+central_obs <- replicate(n = num_obs,
+                    expr = my_chi_sq(deg_free))
 ```
 
 Plot the density of the observed chi-square observations with a range of 0 to 60 on the x-axis. 
 
 ```{r}
 #plot the density of the observed chi-squared obs
-central_plot <- ggplot(data = data.frame(central_obs), aes(x = central_obs))
+central_plot <- ggplot(data = data.frame(central_obs), aes(x = central_obs)) + geom_density() + xlim(c(0,60)) + ggtitle("Chi-Squared (df = 5)")
 ```
 
 Verify that this density plot agrees with the true density for $\chi^2_5$ using the built in `dchisq()` function.
 
 ```{r}
 #compare your density to the true density of a chi-squared(5)
-central_plot <- central_plot + 
+central_plot <- central_plot + stat_function(fun = dchisq, args = list(df = 5), col = "red")
 ```
 
 ##b)
@@ -102,35 +103,35 @@ Recall from Rencher (5.22) that $$\lambda = \frac{1}{2}\sum_{i=1}^{n}\mu_i^2,$$ 
 
 ```{r}
 #solve for mu using (5.22)
-nc_mu <- 
+nc_mu <- sqrt(2*lambda/deg_free)
 
 #sample from the Normal distribution
-y <- 
+y <- rnorm(n = deg_free, mean = nc_mu, sd = 1)
 
 #work with the sum of squared Normals
-u <- 
+u <- sum(y^2)
 ```
 
 Now, we can use our handy dandy `my_chi_sq()` function from above to create a vector of 10,000 non-central chi squared observations.
 
 ```{r}
 #use my_chi_sq() and repliate() to create a vector of non-central chi-squared
-noncentral_obs <- replicate(n = ,
-                    expr = )
+noncentral_obs <- replicate(n = num_obs,
+                    expr = my_chi_sq(degrees_freedom = deg_free, mu = nc_mu, sigma = 1))
 ```
 
 Plot the density of the observed non-central chi-square observations with a range of 0 to 60 on the x-axis.
 
 ```{r}
 #plot the observations
-noncentral_plot <- ggplot(data = data.frame(noncentral_obs), aes(x = noncentral_obs)) 
+noncentral_plot <- ggplot(data = data.frame(noncentral_obs), aes(x = noncentral_obs)) + geom_density() + xlim(c(0,60)) + ggtitle(TeX("Chi-Squared (df=5, $\\lambda$=2)"))
 ```
 
 Verify that this density plot agrees with the true density for $\chi^2_{5,2}$ using the built in `dchisq()` function. Hint: $\lambda$ in `R` is 2 times $\lambda$ in class (don't ask me why).
 
 ```{r}
 #compare your density to the true density of a chi-squared(5,2)
-noncentral_plot <- noncentral_plot + 
+noncentral_plot <- noncentral_plot + stat_function(fun = dchisq, args = list(df = 5, ncp = 2 * lambda),  col = "red")
 ```
 
 ##c)
@@ -154,7 +155,7 @@ tab <- data.frame(Dist = "Chi-Squared",
 
 #F distribution
 ##a)
-Simulate 10,000 independent random observatios from a central F distribution with 2 and 20 degrees of freedom for the numerator and denominator, respectively.
+Simulate 10,000 independent random observations from a central F distribution with 2 and 20 degrees of freedom for the numerator and denominator, respectively.
 
 ```{r}
 n <- 10000 #number of observations
@@ -166,12 +167,15 @@ Do this by first sampling from two independent chi-square distributions
 
 ```{r}
 #sample from two independent chi-square distributions
+num <- rchisq(n = 1, df = df_num)
+denom <- rchisq(n = 1, df = df_denom)
 ```
 
 and work with the ratio of the observations.
 
 ```{r}
 #take the ratio
+f <- (num/df_num)/(denom/df_denom)
 ```
 
 Now, right a function `my_f()` that does the following: 
@@ -182,29 +186,37 @@ Now, right a function `my_f()` that does the following:
 
 ```{r}
 #now write a function
+my_f <- function(degrees_freedom_num, degrees_freedom_denom, ncp = 0)
+{
+  num <- rchisq(n = 1, df = degrees_freedom_num)
+  denom <- rchisq(n = 1, df = degrees_freedom_denom)
+  f <- (num/degrees_freedom_num)/(denom/degrees_freedom_denom)
+  return(f)
+}
 
 #test your function
-
+my_f(df_num, df_denom)
 ```
 
 Use the `replicate()` function to create a vector of 10,000 random variable constructed using your `my_f()` function.
 
 ```{r}
-#use replicate to create a vector of F observartions
-
+#use replicate to create a vector of F observations
+central_obs <- replicate(n = num_obs, expr = my_f(df_num, df_denom))
 ```
 
 Plot the density of the observed F distribution with a range of 0 to 20 on the x-axis.
 
 ```{r}
 #plot your observations
+central_plot <- ggplot(data = data.frame(central_obs), aes(x = central_obs)) + geom_density() + xlim(c(0,20)) + ggtitle("F (0,,20)")
 ```
 
 Verify that this density plot agrees with the true density for $F_{2,20}$ using the built in `df()` function.
 
 ```{r}
 #compare your density to the true density of a F(2,20)
-
+central_plot <- central_plot + stat_function(fun = df, args = list(df1 = df_num, df2 = df_denom), col = "red")
 ```
 
 ##b)
