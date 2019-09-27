@@ -1,0 +1,131 @@
+---
+title: "BIOS7345 Lab 3"
+Subtitle: "Centering"
+author: "Sarah Lotspeich"
+date: "27 September 2018"
+output: pdf_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+
+#Frank's regression package
+library(rms)
+
+#all hail pipes
+library(magrittr)
+library(dplyr)
+```
+
+With the `Cereal.csv` data (on the GitHub), 
+
+```{r}
+dat <- read.csv("https://raw.githubusercontent.com/sarahlotspeich/Fall2019_BIOS7345_Labs/master/Data/Cereal.csv", header=TRUE, stringsAsFactors=FALSE)
+```
+
+use linear regression to regress cereal rating on calories and sugar without an interaction (use an intercept). You may use either `lm()` or `rms::ols()`. 
+
+```{r}
+mod <- 
+```
+
+Give the interpretation of the parameter estimates. Try to use the `mod` object created above to dynamically code your coefficient estimates instead. 
+
+```{r}
+
+```
+
+  - $\beta_0:$ 
+  - $\beta_1:$ 
+  - $\beta_2:$ 
+
+*Pop quiz:* what do you call it when you estimate based on values that are far outside the observed (or realistic) range for your predictors? 
+  
+Does this intercept interpretation make sense? 
+
+Now, let's try centering both `sugars` and `calories` at their mean values
+
+```{r}
+dat$sugars_centered <- 
+dat$calories_centered <- 
+```
+
+and refit the model above for `rating ~ calories_centered + sugars_centered`.
+
+```{r}
+mod_cent <- 
+```
+
+Given an interpretation of the intercept estimate. 
+
+  - $\beta_0$: 
+
+After centering, we should have that $\hat{\beta}_0 = \bar{y}$. Check that this is true.
+
+```{r}
+
+```
+
+How do the effects of `sugars` and `calories` change with centering? 
+
+  - $\beta_1:$ 
+  - $\beta_2:$ 
+
+```{r}
+
+```
+
+What about the standard errors of these effects? How can we get the standard errors directly from the model object (e.g. not printing it or just typing `mod`)? Hint: the `vcov()` function is key.
+
+```{r}
+
+```
+
+Round the covariance matrix of the centered model. What do we notice about the some of the off-diagonal entries?
+
+```{r}
+
+```
+
+What is happening here? Think about the [1,2] element of the covariance matrix.
+
+\begin{eqnarray*}
+Cov(\hat{\beta}_0, \hat{\beta}_1) &=& ?
+\end{eqnarray*}
+
+Now, divide the centered predictors by their standard deviations (to standardize them)
+
+```{r}
+dat$sugars_standard <- 
+dat$calories_standard <-
+```
+
+and refit the model above for `rating ~ calories_standard + sugars_standard`.
+
+```{r}
+mod_standard <- 
+```
+
+Given an interpretation of the intercept estimate. 
+
+  - $\beta_0$: 
+  
+What do we notice about the intercept for the standardized model? 
+  
+Compare the $R^2$ values for the original, centered, and standardized models. What do you see? Hint: you can access the $R^2$ of a model fit using the `rms` package using `$stats`. 
+
+```{r}
+
+```
+
+Show how to obtain the coefficients from the centered/scaled model as a function of the centered/unscaled coefficients and the standard deviation of the predictor variables (e.g. obtain $\pmb{\beta}_{cent,scaled}$ from $\pmb{\beta}_{cent,unscaled}$ and $s^2_{xi}$). 
+
+```{r}
+
+```
+
+Do the same for the SEs. 
+
+```{r}
+
+```
