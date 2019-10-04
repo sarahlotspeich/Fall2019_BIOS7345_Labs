@@ -1,0 +1,325 @@
+---
+title: "BIOS7345 Lab 4"
+Subtitle: "Model Mispecification"
+author: "Sarah Lotspeich"
+date: "4 October 2018"
+output: pdf_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+
+#Frank's regression package
+library(rms)
+
+#all hail pipes
+library(magrittr)
+library(dplyr)
+
+#set the seed so that your simulation results are reproducible
+set.seed(333)
+```
+
+#Underfitting
+#Generate data
+Simulate `n = 1000` independent observations from the following distributions:
+
+  1.  $x_{1i} \sim N(0,1)$
+  
+```{r}
+x1 <- 
+```
+
+  2.  $X_{2i} \sim N(x_{1i}, 1)$
+  
+```{r}
+x2 <- 
+```
+
+  3.  $y_i \sim N(2 + 2x_{1i} + 3x_{2i}, 1)$
+  
+```{r}
+y <- 
+```
+
+Based on the way we've generate our data, the correct model is $$y_{i} = \beta_0 + \beta_1x_{1i} + \beta_2x_{2i} + \epsilon_i.$$
+
+Begin by fitting the **correct** model,
+
+```{r}
+model_full <- 
+```
+
+and then fit the reduced (e.g. underfitted) model for $y_i$ on $x_{1i}$ without adjusting for $x_{2i}$.
+
+```{r}
+model_red <- 
+```
+
+Why is this model underfitted? 
+
+\begin{quote}
+
+\end{quote}
+
+Compare the coefficients on $x_{1i}$ from the full ($\hat{\beta}_1$)
+
+```{r}
+
+```
+
+and reduced ($\hat{\beta}_1^*$) models.
+
+```{r}
+
+```
+
+Is $\hat{\beta}_1^*$ biased? 
+\begin{quote}
+ 
+\end{quote}
+
+Compare the standard errors of the coefficients on $x_{1i}$ from the full ($SE(\hat{\beta}_1)$)
+
+```{r}
+
+```
+
+and reduced ($SE(\hat{\beta}_1^*)$) models.
+
+```{r}
+
+```
+
+Is $SE(\hat{\beta}_1^*)$ biased? 
+\begin{quote}
+
+\end{quote}
+
+![From Rencher](Thrm7_9c.png)
+
+Using the full and reduced model, show that Theorem 7.9c (i) holds: 
+
+```{r}
+#LHS: cov(beta-hat1) - cov(beta-hat1*)
+lhs <- 
+
+#RHS: sigma2A(B-inv)A'
+A <- 
+B <- 
+sigma2 <- 
+rhs <- 
+
+#Check LHS = RHS
+
+```
+
+What do we observe? 
+\begin{quote}
+
+\end{quote}
+
+Compare the estimated variances.
+
+```{r}
+#estimated variance from full model (correct)
+
+#estimated variance from reduced model (underfitted)
+
+```
+
+Is $\hat{s}^{2*}$ biased? 
+\begin{quote}
+
+\end{quote}
+
+Fit the model $$x_{2i} = \gamma_0 + \gamma_1x_{1i} + \delta_{i},$$ where $\delta_{i} \sim N(0,\theta)$. 
+
+```{r}
+model_btwn <- 
+```
+
+We know that $y_i = \beta_0 + \beta_1x_{1i}+ \beta_2x_{2i} + \epsilon_{i}$ (correct model) and $x_{2i} = \gamma_0 + \gamma_1x_{1i} + \delta_i$ (between model). If we begin with the correct model, we have
+\begin{eqnarray*}
+y_i &=& \beta_0 + \beta_1x_{1i}+ \beta_2x_{2i} + \epsilon_{i} \\
+&=& \beta_0 + \beta_1x_{1i}+ \beta_2[\gamma_0 + \gamma_1x_{1i} + \delta_i] + \epsilon_{i} \text{ subbing in the between model}\\
+&=& (\beta_0 + \beta_2\gamma_0) + (\beta_1 + \beta_2\gamma_1)x_{1i} + (\beta_2\delta_i + \epsilon_{i})
+\end{eqnarray*}
+Now if we set this to be equal to the reduced model,
+\begin{eqnarray*}
+y_i &=& (\beta_0 + \beta_2\gamma_0) + (\beta_1 + \beta_2\gamma_1)x_{1i} + (\beta_2\delta_i + \epsilon_{i}) \\
+\beta_0^* + \beta_1^*x_{1i} + \epsilon_i^* &\overset{set}{=}&  (\beta_0 + \beta_2\gamma_0) + (\beta_1 + \beta_2\gamma_1)x_{1i} + (\beta_2\delta_i + \epsilon_{i})
+\end{eqnarray*}
+Hence, $\beta_1^* = \beta_1 + \beta_2\gamma_1$. Use this relationship to get $\beta_1$ based only on your reduced and between models
+
+```{r}
+
+```
+
+and compare it to $\hat{\beta}_1$ from the full model.
+
+```{r}
+
+```
+
+##Mediator variables
+Suppose $x_1$ represents a measure of how a person was parented as a child, and researchers want to know whether this affects how confident a person feels about parenting their own children ($y_i$). 
+
+It is believed that the way in which a person is parented affects their self confidence and self-esteem later in life ($x_2$), which in turn affects how confident a person feels about parenting their own children ($y_i$), i.e. $x_2$ is a mediator of the relationship between $x_1$ and $y$. 
+
+There are also other indirect effects of $x_1$ on $y$ through other unmeasured mechanisms (e.g. parenting strategies). 
+
+Suppose one fits the above reduced model. Is $\hat{\beta}_1^{*}$ still biased?
+
+\begin{quote}
+
+\end{quote}
+
+#Overfitting
+#Generate data
+Simulate `n = 1000` independent observations from the following distributions:
+
+  1.  $x_{1i} \sim N(0,1)$
+  
+```{r}
+x1 <- 
+```
+
+  2.  $X_{2i} \sim N(x_{1i}, 1)$
+  
+```{r}
+x2 <- 
+```
+
+  3.  $y_i \sim N(2 + 2x_{1i} + 3x_{2i}, 1)$
+  
+```{r}
+y <- 
+```
+
+Based on the way we've generate our data, the correct model is $$y_{i} = \beta_0 + \beta_1x_{1i} + \epsilon_i.$$
+
+Begin by fitting the full (e.g. overfitted) model,
+
+```{r}
+model_full <- 
+```
+
+and then fit the reduced (**correct**) model for $y_i$ on $x_{1i}$ without adjusting for $x_{2i}$.
+
+```{r}
+model_red <- 
+```
+
+Why is this model overfitted? 
+
+\begin{quote}
+
+\end{quote}
+
+Compare the coefficients on $x_{1i}$ from the full ($\hat{\beta}_1$)
+
+```{r}
+
+```
+
+and reduced ($\hat{\beta}_1^*$) models.
+
+```{r}
+
+```
+
+Is $\hat{\beta}_1^*$ biased? 
+\begin{quote}
+ 
+\end{quote}
+
+Compare the standard errors of the coefficients on $x_{1i}$ from the full ($SE(\hat{\beta}_1)$)
+
+```{r}
+
+```
+
+and reduced ($SE(\hat{\beta}_1^*)$) models.
+
+```{r}
+
+```
+
+Is $SE(\hat{\beta}_1^*)$ biased? 
+\begin{quote}
+
+\end{quote}
+
+Compare the estimated variances.
+
+```{r}
+#estimated variance from full model (correct)
+
+#estimated variance from reduced model (underfitted)
+
+```
+
+Is $\hat{s}^{2*}$ biased? 
+
+\begin{quote}
+
+\end{quote}
+
+#Independent covariates
+Repeat the overfit and underfit exercises (above) by simulating $x_{2i} \sim N(0,1)$ instead (e.g. $x_{2i}$ is not correlated with $x_{1i}$) and see how the results differ.
+
+##Underfitting
+
+```{r}
+#generate new data
+x1 <- rnorm(n = 1000, mean = 0, sd = 1)
+x2 <- rnorm(n = 1000, mean = 0, sd = 1)
+y <- rnorm(n = 1000, 2 + 2*x1 + 3*x2, sd = 1)
+
+#fit full model y ~ x1 + x2
+model_full <- 
+#fit reduced model y ~ x1
+model_red <- 
+
+#compare coefficients on x1
+
+
+#compare SEs on coefficients on x1
+
+#compare estimated variances
+
+```
+
+Observations on overfitting when $x_1 \perp x_2$:
+
+  1. 
+  2.  
+  3.  
+
+##Overfitting
+
+```{r}
+#generate new data
+x1 <- 
+x2 <- 
+y <- 
+
+#fit full model y ~ x1 + x2
+model_full <- 
+#fit reduced model y ~ x1
+model_red <-
+
+#compare coefficients on x1
+
+#compare SEs on coefficients on x1
+
+#compare estimated variances
+
+```
+
+Observations on overfitting when $x_1 \perp x_2$:
+
+  1.  
+  2.  
+  3.  
