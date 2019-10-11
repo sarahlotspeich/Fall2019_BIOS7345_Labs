@@ -1,0 +1,183 @@
+---
+title: "BIOS7345 Lab 5"
+subtitle: "Testing coefficients"
+author: "Sarah Lotspeich"
+date: "5 October 2018"
+output: pdf_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE, warning = FALSE, message = FALSE, tidy = TRUE)
+
+#Run this, then delete it
+#install.packages("gmodels")
+
+#Load packages
+library(rms)
+library(ggplot2)
+library(magrittr)
+library(gmodels)
+library(dplyr)
+```
+
+#Introduction
+A scientist named Dr. Bosenberg wanted to estimate the \underline{puncture distance for an epidural} in children by \underline{weight}. He regressed skin-to-epidural distance (`SED`) on weight (`WT`) and obtained a regression line. 
+
+#Fitting models
+```{r}
+#read in the data
+dat <- read.csv("https://raw.githubusercontent.com/sarahlotspeich/BIOS7345_Labs/master/Bios7345lab5.csv", 
+                header=TRUE, 
+                stringsAsFactors = FALSE)
+
+#fit the model for SED ~ WT
+mod <- ols(SED ~ WT, data = dat)
+```
+
+Create a plot of this regression line over the data. Begin by writing a simple function to predict `SED` for a given `WT` based on your `mod` coefficients.
+
+```{r}
+#write function to predict SED from WT
+est_SED <- function(x) return(mod$coefficients["Intercept"] + mod$coefficients["WT"]*x)
+
+#create a plot of the data
+my_plot <- dat %>% ggplot() + geom_point(aes(x = WT, y = SED), size = 2) + theme_bw()
+
+#overlay this plot with the regression line using stat_function()
+my_plot <- my_plot + stat_function(fun = est_SED, col = "red", lwd = 1, alpha = 0.8)
+```
+
+He then simplified his regression equation for clinicals to a 1mm/kg rule such that $\hat{\beta}_1 = 1$ and $\hat{\beta}_0 = 0$. Overlay your plot with the simplified model: $\hat{\text{WT}} = 0 + 1 \times \hat{\text{SED}}.$
+
+```{r}
+#use geom_abline() to overlay x = y line
+my_plot <- my_plot + geom_abline(slope = 1, intercept = 0, col = "blue", lwd = 1)
+
+#print your plot
+my_plot
+```
+
+#Testing coefficients
+
+Use the function `gmodels::estimable()` to obtain the estimates, SEs, and p-values for testing whether each regression coefficient equals 0 (i.e. those from the standard regression output). 
+
+What contrast matrix, $\pmb{C}$, will give us $\pmb{\beta}_{1 \times 2}^T\pmb{C} = \pmb{0}_{1 \times 2}$? 
+\begin{quote}
+To test that $H_0: \beta_0 = 0$ and $H_0: \beta_1 = 0$, we need $\pmb{C} = \pmb{I}_2 = \begin{bmatrix} 1 & 0 \\ 0 & 1 \end{bmatrix}$ so that $\pmb{\beta}_{1 \times 2}^T\pmb{C} = \pmb{\beta}_{1 \times 2}^T$. 
+\end{quote}
+
+Create the appropriate contrast matrix, `C`,
+
+```{r}
+C <- diag(1, nrow = 2, ncol = 2)
+```
+
+and use it as the `cm` input for `gmodels::estimable()`. For `beta0` input a vector for the null values of the parameters.
+
+```{r}
+estimable(obj = mod, cm = C, beta0 = c(0,0))
+```
+
+Compare this output to that from your model.
+
+```{r}
+#view model
+mod
+```
+
+Now, separately test the effect of `WT`, i.e. $$H_0: \beta_1 = 0 \text{ vs. } H_1: \beta_1 \neq 0.$$ What contrast matrix, $\pmb{C}$, will give us $\pmb{\beta}_{2 \times 1}\pmb{C} = \beta_1 = 0$? 
+\begin{quote}
+To test that $H_0: \beta_1 = 0$, we need $\pmb{C} = \begin{bmatrix} 0 & 1 \end{bmatrix}$ so that $\pmb{\beta}_{1 \times 2}^T\pmb{C} = 0\beta_0 + \beta_1 = \beta_1$. 
+\end{quote}
+
+Create the appropriate contrast matrix, `C`, and use `estimable()` to get the estimates, SEs, and p-values for this test.
+
+```{r}
+C <- matrix(c(0,1), nrow = 1)
+estimable(mod, cm = C, beta0 = 0)
+```
+
+Obtain the joint test of whether $\begin{bmatrix}\beta_0 & \beta_1 \end{bmatrix}^T = \begin{bmatrix}0 & 1 \end{bmatrix}^T$. 
+
+```{r}
+C <- diag(1, nrow = 2, ncol = 2)
+estimable(mod, cm = C, beta0 = c(0,1), joint.test = TRUE)
+```
+
+Do you think Dr. Bosenberg's simplification of the original model was a good idea? 
+\begin{quote}
+No, we see from the test above that the slope and intercept from our model were significantly different from that in the simplified model.
+\end{quote}
+
+Now, code the joint test (for overall regression) by hand using matrices and the F-test. 
+
+```{r}
+#create design matrix/ response vector
+X <- dat %>% select(WT) %>% mutate(Int = 1) %>% select(Int, WT) %>% data.matrix()
+y <- dat %>% select(SED) %>% data.matrix()
+
+#same contast matrix
+C <- diag(1, nrow = 2, ncol = 2)
+
+#save some helpful constants
+q <- C %>% nrow()
+k <- C %>% ncol() - 1
+n <- y %>% nrow()
+
+#Thrm 8.4a pg 199
+H <- X %*% solve(t(X) %*% X) %*% t(X)
+B <- solve(t(X) %*% X) %*% t(X) %*% y
+SSH <- t(C %*% B) %*% solve(C %*% solve(t(X) %*% X) %*% t(C)) %*% C %*% B
+SSE <- t(y) %*% (diag(n) - H) %*% y
+
+#test statistic
+(F <- (SSH/q)/(SSE/(n-k-1)))
+
+#p-value
+pf(F, q, n-k-1, lower.tail = FALSE)
+```
+
+Does the F-test statistic match the test statistic obtained via the `estimable()` function? 
+
+Note: the `estimable()` function returns a $\chi^2$ test statistic, but F and $\chi^2$ test statistics are really the same thing in that, after a normalization, $\chi^2$ is the limiting distribution of the F as the denominator degrees of freedom goes to infinity. The normalization is $$\chi^2 = \text{df}_{\text{num}}.F$$
+
+```{r}
+estimable(mod, cm = C, joint.test = TRUE)
+
+#normalize the chi-squared test stat
+4710.769*q
+```
+
+Do the p-values match? Why or why not? 
+
+```{r}
+#get p-value
+pchisq(4710.769*q, q, lower.tail = FALSE)
+```
+
+Now, hand code the test to jointly compare the fitted model to the simplification. 
+
+```{r}
+#vector of null values
+beta_null <- c(0,1)
+
+#Thrm 8.4f/g, pg 203
+SSH <- t(C %*% B - beta_null) %*% solve(C %*% solve(t(X) %*% X) %*% t(C)) %*% (C %*% B - beta_null)
+SSE <- t(y) %*% (diag(n) - H) %*% y
+
+#test statistic
+(F <- (SSH/q)/(SSE/(n-k-1)))
+
+#p-value
+pf(F, q, n-k-1, lower.tail = FALSE)
+```
+
+and compare this to the output from `estimable()`.
+
+```{r}
+estimable(mod, cm = C, beta0 = beta_null, joint.test = TRUE)
+```
+
+What do we notice? 
+
+`estimable()` uses `1-pchisq(F*2,2)`, i.e. a Wald Test (large sample). Recall from your notes that quadratic form $Q$ (Wald Test) is divided by degrees of freedom $q$ to derive $F$ statistic.
