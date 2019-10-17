@@ -1,0 +1,182 @@
+---
+title: "BIOS7345 Lab # 6"
+subtitle: "Sums of squares"
+author: "Sarah Lotspeich"
+date: "18 Oct 2019"
+output: pdf_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+# Introduction
+Suppose researchers conduct a study measuring the concentration of abnormal toxins in a specific kind of human tissue. They are interested in knowing whether differences exist based on gender or race. Data are taken from 90 individuals, n which each observation includes a response (continuous $y_i$), gender (male/ female), and race (White/ Black/ Other). 
+
+# Balanced design
+Use the following `R` code to simulate data using a balanced design: 
+
+```{r}
+n <- 90
+gender <- as.factor(rep(c("male","female"), each = n/2))
+race <- as.factor(rep(rep(c("W", "B", "O"), each = n/6),2))
+mu <- 50 + 0.5*(gender == "male") + 0.5*(race == "B") + 0*(race == "O") +
+  1*(gender =="male")*(race == "O")
+set.seed(1)
+y <- rnorm(n, mean = mu, sd = 2)
+```
+
+## Model 1(a)
+Calculate the estimated regression coefficients and corresponding p-values for the model `y \sim race + gender + race*gender` using the `lm()` function. 
+
+```{r}
+mod1a <- lm(y ~ race*gender)
+summary(mod1a)
+```
+
+## Model 1(b)
+Calculate the estimated regression cofficients and corresponding p-values for the model  `y \sim gender + race + gender*race` (i.e. switch the order of the main effects) using the `lm()` function.
+
+```{r}
+mod1b <- lm(y ~ gender*race)
+summary(mod1b)
+```
+
+How do the estimates and p-values for Models 1(a) and 1(b) compare? 
+
+\begin{quote}
+They are the same. Thus, the ordering of main effects did not matter. These p-values are for the individual levels of the factor variables (e.g. Black versus Other and Black versus White) rather than the collective effect of gender. 
+\end{quote}
+
+Calculate the Type I SS and corresponding p-values for Models 1(a) and 1(b). 
+
+```{r}
+anova(mod1a)
+anova(mod1b)
+```
+
+How do they compare? 
+
+\begin{quote}
+Once again, reordering the main effects between Models 1(a) and 1(b) did not affect the Type I SS. However, it could affect the interpretations as these are "sequential" sums of squares, but since this is a balanced design it does not. We would interpret the SS from Model 1(a) as follows: the p-value for the main effect of race is 0.586 (so we fail to reject), the p-value for the main effect of gender after the main effect of race is 0.057 (so we would fail to reject except at $\alpha = 0.10$), and the p-value for the interaction effect after the main effects of race and gender is 0.289 (so we fail to reject). 
+\end{quote}
+
+For Model 1(a), calculate the Type II and Type III sums of squares and corresponding p-values using the `car` package. Pay attention to the `type = ` option in the `Anova()` function. 
+
+```{r}
+car::Anova(mod1a, type = 2)
+car::Anova(mod1b, type = 3)
+```
+
+How do they compare to the Type I SS?
+
+\begin{quote}
+The F statistics and p-values are the same for the Type I, II, and III SS based on Model 1(a). Type II sums of squares tests for each main effect after the other main effect. Type III sums of squares tests for the presence of a main effect after the other main effect and interaction. When data are balanced, the factors are orthogonal, and types I, II and III all give the same results.
+\end{quote}
+
+Is gender associated with the concentration of toxins? You may use `rms::anova()`. 
+
+```{r}
+anova(rms::ols(y~gender+race + gender*race), test='Chisq')
+```
+
+\begin{quote}
+With a $\chi^2$ test statistic of 6.23 and corresponding p-value of 0.1011, we fail to reject the null hypothesis that gender is not associated with the concentration of toxins. 
+\end{quote}
+
+# Unbalanced design
+Use the following `R` code to simulate data using an unbalanced design: 
+
+```{r}
+n <- 90
+gender <- as.factor(rep(c("male","female"), each = n/2))
+race <- as.factor(c(rep("W",10),rep("B",20),rep("O",15),rep("W",5),rep("B",10),rep("O",30) ))
+mu <- 50 + 0.5*(gender == "male") + 0.5*(race == "B") + 0*(race == "O") + 1*(gender =="male")*(race == "O")
+set.seed(345)
+y <- rnorm(n, mean = mu, sd = 2)
+```
+
+## Model 2(a)
+Calculate the estimated regression coefficients and corresponding p-values for the model `y \sim race + gender + race*gender` using the `lm()` function. 
+
+```{r}
+mod2a <- lm(y ~ race*gender)
+summary(mod2a)
+```
+
+## Model 2(b)
+Calculate the estimated regression cofficients and corresponding p-values for the model  `y \sim gender + race + gender*race` (i.e. switch the order of the main effects) using the `lm()` function.
+
+```{r}
+mod2b <- lm(y ~ gender*race)
+summary(mod2b)
+```
+
+How do the estimates and p-values for Models 2(a) and 2(b) compare? 
+
+\begin{quote}
+As with the balanced design, reordering does not effect estimates or p-values from the individual t-tests. 
+\end{quote}
+
+Calculate the Type I SS and corresponding p-values for Models 2(a) and 2(b). 
+
+```{r}
+anova(mod2a)
+anova(mod2b)
+```
+
+How do they compare? 
+
+\begin{quote}
+The F test statisics and p-values are different for the main effects in Model 2(a) versus Model 2(b). Unlike with the balanced design, with an unbalanced design the sequential sums of squares will vary for different specified orderings of the main effects. We would conclude that the effect of gender is significantly different from 0 after the effect of race, but nothing else. 
+\end{quote}
+
+For Model 2(a), calculate the Type II and Type III sums of squares and corresponding p-values using the `car` package. Pay attention to the `type = ` option in the `Anova()` function. 
+
+```{r}
+car::Anova(mod2a, type = 2)
+car::Anova(mod2b, type = 3, contrasts=list(gender=contr.sum, race=contr.sum))
+```
+
+How do they compare to the Type I SS?
+
+\begin{quote}
+The Type II SS for gender was the same as the Type I SS, as was the Type II SS for the interaction between race and gender. However, only the Type III SS for the interaction was consistent with the Type I SS. 
+\end{quote}
+
+Is gender associated with the concentration of toxins? 
+
+```{r}
+anova(rms::ols(y~gender+race + gender*race), test='Chisq')
+```
+
+\begin{quote}
+With a $\chi^2$ test statistic of 11.07 and corresponding p-value of 0.0114, we reject the null hypothesis that gender is not associated with the concentration of toxins at the $\alpha = 0.05$ significance level. 
+\end{quote}
+
+# Tests for association
+Specify the appropriate $\pmb{C}$ matrix to test whether gender is associated with the concentration of toxins using $H_0: \pmb{C\beta} = \pmb{0}$. 
+
+```{r}
+C <- matrix(c(0,1,0,0,0,0,
+              0,0,0,0,1,0,
+              0,0,0,0,0,1),
+           byrow=TRUE,nrow=3)
+gmodels::estimable(mod2b,cm=C,joint.test=TRUE)
+```
+
+Specify the appropriate $\pmb{C}$ matrix to test whether race is associated with the concentration of toxins using $H_0: \pmb{C\beta} = \pmb{0}$. 
+
+```{r}
+C <- matrix(c(0,0,1,0,0,0,
+             0,0,0,1,0,0,
+             0,0,0,0,1,0,
+             0,0,0,0,0,1),
+           byrow=TRUE,nrow=4)
+gmodels::estimable(mod2b,cm=C,joint.test=TRUE)
+```
+
+# References
+[This](https://mcfromnz.wordpress.com/2011/03/02/anova-type-iiiiii-ss-explained/ ) is where I got the interpretations of the different SS. 
+
+
