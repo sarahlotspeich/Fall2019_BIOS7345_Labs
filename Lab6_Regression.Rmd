@@ -1,0 +1,145 @@
+---
+title: "BIOS7345 Lab # 6"
+subtitle: "Sums of squares"
+author: "Sarah Lotspeich"
+date: "18 Oct 2019"
+output: pdf_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+# Introduction
+Suppose researchers conduct a study measuring the concentration of abnormal toxins in a specific kind of human tissue. They are interested in knowing whether differences exist based on gender or race. Data are taken from 90 individuals, n which each observation includes a response (continuous $y_i$), gender (male/ female), and race (White/ Black/ Other). 
+
+# Balanced design
+Use the following `R` code to simulate data using a balanced design: 
+
+```{r}
+n <- 90
+gender <- as.factor(rep(c("male","female"), each = n/2))
+race <- as.factor(rep(rep(c("W", "B", "O"), each = n/6),2))
+mu <- 50 + 0.5*(gender == "male") + 0.5*(race == "B") + 0*(race == "O") + 1*(gender =="male")*(race == "O")
+set.seed(1)
+y <- rnorm(n, mean = mu, sd = 2)
+```
+
+## Model 1(a)
+Calculate the estimated regression coefficients and corresponding p-values for the model `y \sim race + gender + race*gender` using the `lm()` function. 
+
+```{r}
+
+```
+
+## Model 1(b)
+Calculate the estimated regression cofficients and corresponding p-values for the model  `y \sim gender + race + gender*race` (i.e. switch the order of the main effects) using the `lm()` function.
+
+```{r}
+
+```
+
+How do the estimates and p-values for Models 1(a) and 1(b) compare? 
+
+```{r}
+
+```
+
+Calculate the Type I SS and corresponding p-values for Models 1(a) and 1(b). 
+
+```{r}
+
+```
+
+How do they compare? 
+
+```{r}
+
+```
+
+For Model 1(a), calculate the Type II and Type III sums of squares and corresponding p-values using the `car` package. Pay attention to the `type = ` option in the `Anova()` function. 
+
+```{r}
+
+```
+
+How do they compare to the Type I SS?
+
+```{r}
+
+```
+
+Is gender associated with the concentration of toxins? 
+
+```{r}
+
+```
+
+# Unbalanced design
+Use the following `R` code to simulate data using an unbalanced design: 
+
+```{r}
+n <- 90
+gender <- as.factor(rep(c("male","female"), each = n/2))
+race <- as.factor(c(rep("W",10),rep("B",20),rep("O",15),rep("W",5),rep("B",10),rep("O",30) ))
+mu <- 50 + 0.5*(gender == "male") + 0.5*(race == "B") + 0*(race == "O") + 1*(gender =="male")*(race == "O")
+set.seed(345)
+y <- rnorm(n, mean = mu, sd = 2)
+```
+
+## Model 2(a)
+Calculate the estimated regression coefficients and corresponding p-values for the model `y \sim race + gender + race*gender` using the `lm()` function. 
+
+```{r}
+
+```
+
+## Model 2(b)
+Calculate the estimated regression cofficients and corresponding p-values for the model  `y \sim gender + race + gender*race` (i.e. switch the order of the main effects) using the `lm()` function.
+
+```{r}
+
+```
+
+How do the estimates and p-values for Models 2(a) and 2(b) compare? 
+
+```{r}
+
+```
+
+Calculate the Type I SS and corresponding p-values for Models 2(a) and 2(b). 
+
+```{r}
+
+```
+
+How do they compare? 
+
+```{r}
+
+```
+
+For Model 2(a), calculate the Type II and Type III sums of squares and corresponding p-values using the `car` package. Pay attention to the `type = ` option in the `Anova()` function. 
+
+```{r}
+
+```
+
+How do they compare to the Type I SS?
+
+```{r}
+
+```
+
+Is gender associated with the concentration of toxins? 
+
+```{r}
+
+```
+
+# Test for association with gender
+Specify the appropriate $\pmb{C}$ matrix to test whether gender is associated with the concentration of toxins using $H_0: \pmb{C\beta} = \pmb{0}$. This is the strategy used in `rms::anova()` with the `test = 'Chisq'` option. 
+
+```{r}
+
+```
