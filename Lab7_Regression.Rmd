@@ -1,0 +1,218 @@
+---
+title: "BIOS7345 Lab 7"
+subtitle: "Factor coding schemes"
+author: "Sarah Lotspeich"
+date: "2 November 2018"
+output: pdf_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE, warning = FALSE, message = FALSE, tidy = TRUE)
+
+#Load packages
+library(magrittr)
+```
+
+#Introduction
+We are interested in comparing the `grades` of students in 3 different mathematics `classes`. A sample of 30 students is obtained.
+
+```{r}
+set.seed(12)
+n <- 30 #number of students
+grades <- rnorm(n, 75, 5)
+classes <- sample(c("Class A", "Class B", "Class C"), n, replace = TRUE) %>% factor(levels = c("Class A", "Class B", "Class C"))
+```
+
+Begin by finding the overall mean grade across all classes 
+
+```{r}
+#overall mean grade
+```
+
+as well as the mean grade in each class
+
+```{r}
+#class-specific mean grades
+aggregate()
+```
+
+Before we begin, a [helpful lil page](https://stats.idre.ucla.edu/r/library/r-library-contrast-coding-systems-for-categorical-variables/) on factor coding schemes.
+
+#Model 1: Reference cell coding
+Reference cell coding is what we commonly refer to as "dummy variable coding". Since we have $k = 3$ levels of the `classes` variable, how many indicator variables will we need? 
+
+There are three levels to the unordered factor variable `classes`
+
+```{r}
+#inspect the cell counts in each class
+
+```
+
+so we will have 3 - 1 = 2 contrasts.
+
+##Fit the model
+```{r}
+options(contrasts = c("contr.treatment", "contr.poly"))
+mod <- lm(grades ~ classes)
+summary(mod)
+```
+
+What does your $\pmb{\beta}$ vector look like for this model? 
+
+$$\pmb{\beta} = \begin{bmatrix}\beta_0 \\ \beta_1 \\ \beta_2\end{bmatrix}$$
+
+##Design matrix
+Obtain the design matrix for this coding scheme (ignoring replicates) from your  `mod` object.  
+
+```{r}
+#save the unique rows of your design matrix
+
+```
+
+Stop and think: which group is your reference group? 
+
+\begin{quote}
+The reference group is identified as that for which all indicator variables are equal to 0. In our case, if we assume that the first row is Class A then Class A is our reference group. 
+\end{quote}
+
+##Group means
+We can obtain the class-specific means from the model parameter estimates by multiplying the unique rows of the design matrix (`X`) by the coefficients. 
+
+```{r}
+#obtain class-specific means 
+```
+
+How do these means compare to those we calculated initially using `aggregate()`? 
+
+\begin{quote}
+
+\end{quote}
+
+So what does this mean? When using reference cell coding, we have 
+
+  1.  $\bar{X}_1 =$ 
+  2.  $\bar{X}_2 =$ 
+  3.  $\bar{X}_3 =$ 
+  
+If we knew the true mean grades in each class ($\mu_A, \mu_B, \mu_C$, respectively), how could we obtain the model parameters directly? 
+
+  1.  $\beta_0 = $: 
+  2.  $\beta_1 = $: 
+  3.  $\beta_2 = $: 
+  
+#Model 2: deviation coding
+Whereas reference cell coding compared each level to a reference level, deviation coding compares each level to a grand mean. 
+
+##Fit the model
+```{r}
+options(contrasts = c("contr.sum", "contr.poly"))
+mod <- lm(grades ~ classes)
+summary(mod)
+```
+
+What does your $\pmb{\beta}$ vector look like for this model? 
+
+$$\pmb{\beta} = \begin{bmatrix}\mu \\ \alpha_1 \\ \alpha_2\end{bmatrix}$$
+Here, $\mu$ is the \underline{grand mean}... but what's the grand mean anyway? 
+
+```{r}
+#is it the overall mean? 
+
+
+#or is it the mean of the means of the dependent variable at all levels of the factor
+
+```
+
+##Design matrix
+Obtain the design matrix for this coding scheme (ignoring replicates) from your  `mod` object.
+
+```{r}
+#save the unique rows of your design matrix
+
+```
+
+How do we interpret the rows of `X`? 
+
+  1.  
+  2.  
+  3.  
+
+##Group means
+We can obtain the class-specific means from the model parameter estimates by multiplying the unique rows of the design matrix (`X`) by the coefficients. 
+
+```{r}
+#obtain class-specific means
+
+```
+
+How do these means compare to those we calculated initially using `aggregate()`? 
+
+\begin{quote}
+
+\end{quote}
+
+So what does this mean? When using deviation coding, we have 
+
+  1.  $\bar{X}_1 =$
+  2.  $\bar{X}_2 =$
+  3.  $\bar{X}_3 =$
+  
+If we knew the true mean grades in each class ($\mu_A, \mu_B, \mu_C$, respectively) and the true grand mean ($\bar{\mu}$), how could we obtain the model parameters directly? 
+
+  1.  $\mu = $: 
+  2.  $\alpha_1 = $: 
+  3.  $\alpha_2 = $: 
+  
+#Model 3: Helmert coding
+Whereas reference cell coding compared each level to a reference level and deviation coding compares each level to a grand mean, Helmert coding compares each level with the mean of the subsequent levels. 
+
+##Fit the model
+```{r}
+options(contrasts = c("contr.helmert", "contr.poly"))
+mod <- lm(grades ~ classes)
+summary(mod)
+```
+
+What does your $\pmb{\beta}$ vector look like for this model? 
+
+$$\pmb{\beta} = \begin{bmatrix}\beta_0 \\ \beta_1 \\ \beta_2\end{bmatrix}$$
+
+##Design matrix
+Obtain the design matrix for this coding scheme (ignoring replicates) from your  `mod` object.
+
+```{r}
+#save the unique rows of your design matrix
+
+```
+
+How do we interpret the rows of `X`? 
+
+  1.  
+  2.  
+  3.  
+
+##Group means
+We can obtain the class-specific means from the model parameter estimates by multiplying the unique rows of the design matrix (`X`) by the coefficients. 
+
+```{r}
+#obtain class-specific means
+
+```
+
+How do these means compare to those we calculated initially using `aggregate()`? 
+
+\begin{quote}
+
+\end{quote}
+
+So what does this mean? When using deviation coding, we have 
+
+  1.  $\bar{X}_1 = $
+  2.  $\bar{X}_2 = $
+  3.  $\bar{X}_3 = $
+  
+If we knew the true mean grades in each class ($\mu_A, \mu_B, \mu_C$, respectively) and the true grand mean ($\bar{\mu}$), how could we obtain the model parameters directly? Interpret.
+
+  1.  $\beta_0 = $: 
+  2.  $\beta_1 = $:
+  3.  $\beta_2 = $:

@@ -65,7 +65,8 @@ For Model 1(a), calculate the Type II and Type III sums of squares and correspon
 
 ```{r}
 car::Anova(mod1a, type = 2)
-car::Anova(mod1b, type = 3)
+car::Anova(lm(y~gender+race + gender*race, contrasts=list(gender=contr.sum, race=contr.sum)), 
+           type = 3)
 ```
 
 How do they compare to the Type I SS?
@@ -135,7 +136,8 @@ For Model 2(a), calculate the Type II and Type III sums of squares and correspon
 
 ```{r}
 car::Anova(mod2a, type = 2)
-car::Anova(mod2b, type = 3, contrasts=list(gender=contr.sum, race=contr.sum))
+car::Anova(lm(y~race + gender + race*gender, contrasts=list(gender=contr.sum, race=contr.sum)), 
+           type = 3)
 ```
 
 How do they compare to the Type I SS?
