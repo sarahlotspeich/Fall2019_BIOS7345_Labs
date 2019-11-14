@@ -1,0 +1,114 @@
+---
+title: "BIOS7345 Lab 8"
+subtitle: "Numerical optimization"
+author: "Sarah Lotspeich"
+date: "11/14/2019"
+output: pdf_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+# Logistic regression
+Consider a simple logistic regression model where you have a binary outcome $Y$ and a single covariate $X$ on a sample of $n$ observations. This is equivalent to assuming that $Y \sim Bernoulli(p = (1 + \exp\{-(\alpha + \beta X\}))^{-1})$ based on the model $$\log [\frac{P(Y=1)}{1-P(Y=1)}] = \alpha + \beta X.$$ 
+
+The function $(1 + \exp\{-(\alpha + \beta X\}))^{-1}$ is referred to as the \underline{sigmoid function}. Write a function `sigmoid(x,beta,alpha)` that returns this value. 
+
+```{r}
+# write a function for the sigmoid
+sigmoid <- function(x, beta, alpha)
+{
+
+}
+```
+
+By definition, the likelihood function of the regression model parameters is $$L(\alpha, \beta) = \prod_{i=1}^{n}P(Y_i|\alpha,\beta)$$ and thus the log-likelihood is $$l(\alpha,\beta) = \sum_{i=1}^{n}\log P(Y_i|\alpha,\beta).$$
+
+Based on the distribution of $Y$ (above), what is the detailed form of the log-likelihood? 
+\begin{align}
+l(\alpha,\beta) &= \sum_{i=1}^{n}\log P(Y_i|\alpha,\beta) \\
+&= \sum_{i=1}^{n}\log \{(1 + \exp\{-(\alpha + \beta X\}))^{-1})^Y_i[1-(1 + \exp\{-(\alpha + \beta X\}))^{-1})]^{(1-Y-i)}\} \\
+&= \sum_{i=1}^{n} Y_i\log \{(1 + \exp\{-(\alpha + \beta X\}))^{-1})\} + (1-Y_i)\log\{1-(1 + \exp\{-(\alpha + \beta X\}))^{-1})]^{(1-Y-i)}\}
+\end{align}
+
+Recognize that $\log P(Y_i|\alpha,\beta) = Y_i \log [S(X_i, \alpha, \beta)] + (1-Y_i) \log [1-S(X_i, \alpha, \beta)]$, where we denote the sigmoid function $S(X_i, \alpha, \beta) = (1 + \exp\{-(\alpha + \beta X_i\}))^{-1}$. Use this form to write a `log_likelihood(x, y, beta, alpha)` function that calls your `sigmoid()` function from above. 
+
+```{r}
+log_likelihood <- function(x, y, beta, alpha)
+{
+
+}
+```
+
+And now to get the MLEs we take the derivatives of $l(\alpha,\beta)$ with respect to $\alpha$ and $\beta$, set them equal to 0, and solve... right? Wrong. There is no closed-form solution for the maximum in this setting. This is an exercise on numerical optimization, afterall. 
+
+# Newton-Raphson Method
+We begin with an initial guess for the MLEs $\hat{\theta}^{(0)} = (\hat{\alpha}^{(0)}, \hat{\beta}^{(0)})$, and update it by a Newton-Raphson "step": 
+$$\hat{\theta}^{(1)} = \hat{\theta}^{(0)} - H^{-1}(\hat{\theta}^{(0)}) \nabla l(\hat{\theta}^{(0)})$$ where $H(\hat{\theta}^{(0)})$ is the Hessian matrix of the log-likelihood and $\nabla l(\hat{\theta}^{(0)})$ the gradient. 
+
+## Gradient
+The gradient is a vector of partial derivatives of the same dimension as $\hat{\theta}^{(0)}$ defined $\nabla l(\hat{\theta}^{(0)}) = \begin{bmatrix} \frac{\partial}{\partial\alpha}l(\theta) &  \frac{\partial}{\partial\beta}l(\theta) \end{bmatrix}^T \Bigg|_{\theta = \hat{\theta}^{(0)}}$. Solve for the elements of the gradient and write a `gradient(x, y, beta, alpha)` function that returns the vector (hint: you should also be able to call the `sigmoid()` function). 
+
+```{r}
+gradient <- function(x, y, beta, alpha)
+{
+
+}
+```
+
+## Hessian
+THe hessian is a matrix of double partial derivatives defined $$H^{-1}(\hat{\theta}^{(0)}) = \begin{bmatrix}\frac{\partial^2}{\partial\alpha^2}l(\theta) &\frac{\partial^2}{\partial\alpha\partial\beta}l(\theta) \\ \frac{\partial^2}{\partial\alpha\partial\beta}l(\theta) & \frac{\partial^2}{\partial\beta^2}l(\theta)\end{bmatrix} \Bigg|_{\theta = \hat{\theta}^{(0)}}.$$ Derive the elements of the Hessian and write a `hessian(x, y, beta, alpha)` function that returns this matrix (hint: keep using the `sigmoid` function). 
+
+```{r}
+hessian <- function(x, y, beta, alpha)
+{
+
+}
+```
+
+Now, we have all the necessary functions to carry out a single iteration of the Newton-Raphson method. To arrive at the MLEs, we need to continue taking the Newton-Raphson "steps" until we reach convergence (i.e. until two consecutive iterations' estimates are within some small tolerance).
+
+## Put it all together
+Use the functions you've created in the preceding sections to write your own logistic regression function called `my_logreg()`. In addition to your data `x` and `y`, your should take in arguments for the initial values `alpha0` and `beta0`, as well as the tolerance `TOL` and maximum number of iterations before the algorithm terminates `MAX_ITER`. 
+
+```{r}
+my_logreg <- function(x, y, alpha0 = 0, beta0 = 0, TOL = 1e-4, MAX_ITER = 200)
+{
+
+}
+```
+
+## Test it out
+Use the chunk below to simulate data. Then, compare the results from the `my_logreg()` function to those from `glm()`. 
+
+```{r}
+N <- 100
+alpha <- 1
+beta <- 2
+X <- rnorm(N)
+p <- 1/(1+exp(-(alpha + beta*X)))
+Y <- rbinom(N, 1, p)
+
+
+```
+
+## Starting values
+In the test above, we use "non-informative" initial values; both `alpha0` and `beta0` were set to 0. We know that our data are generated such that the true values of $\alpha$ and $\beta$ are 1 and 2, respectively. Test your function using initial values that are closer to the truth (`alpha0`=0.5 and `beta0`=1.5) and farther from the truth (`alpha0`=-1 and `beta0`=-1). 
+
+```{r}
+# test with initial values closer to the truth
+
+
+# test with initial values farther from the truth
+
+```
+
+What do you observe about the estimates? We arrive at the correct coefficients regardless of what we choose for our starting values. So how should we choose them? You can sometimes make efficiency gains in choosing more informative initial values. Use `system.time()` to compare the performance of the three settings of initial values from above. 
+
+```{r}
+
+```
+
+# References
+  -[https://www.stat.cmu.edu/~cshalizi/350/lectures/26/lecture-26.pdf]
